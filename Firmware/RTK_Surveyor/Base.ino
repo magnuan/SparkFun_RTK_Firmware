@@ -353,6 +353,15 @@ void DevUBLOXGNSS::processRTCM(uint8_t incoming)
 
         espnowProcessRTCM(incoming);
     }
+
+    if ((rtcmLastMessage == 1005 ) && (rtcmParsingState == RTCM_TRANSPORT_STATE_WAIT_FOR_PREAMBLE_D3))
+    {
+        printTimeStamp();
+        systemPrintf("    Here we should send a blank 1008 message for Trimble \r\n");
+        // # blank 1008 message for Trimble
+        // sys.stdout.buffer.write(bytes([0xd3,0x00,0x06,0x3f,0x00,0x00,0x00,0x00,0x00,0x99,0x25,0xca]))
+    }
+
 }
 
 // For Ref Stn (USE_SPI_GNSS and HAS_ETHERNET), call ntripServerProcessRTCM manually if there is RTCM data in the buffer

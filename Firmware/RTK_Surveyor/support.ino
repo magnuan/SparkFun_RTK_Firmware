@@ -563,6 +563,7 @@ bool checkRtcmMessage(uint8_t data)
     if (rtcmParsingState == RTCM_TRANSPORT_STATE_CHECK_CRC)
     {
         rtcmParsingState = RTCM_TRANSPORT_STATE_WAIT_FOR_PREAMBLE_D3;
+        rtcmLastMessage = message; 
 
         // Display the RTCM message header
         if (settings.debugNtripServerRtcm && (!inMainMenu))

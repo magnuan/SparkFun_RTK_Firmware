@@ -686,9 +686,11 @@ bool espnowIncomingRTCM = false;
 bool espnowOutgoingRTCM = false;
 
 static RtcmTransportState rtcmParsingState = RTCM_TRANSPORT_STATE_WAIT_FOR_PREAMBLE_D3;
+static uint16_t rtcmLastMessage = 0;
 uint16_t failedParserMessages_UBX = 0;
 uint16_t failedParserMessages_RTCM = 0;
 uint16_t failedParserMessages_NMEA = 0;
+
 
 unsigned long btLastByteReceived = 0; // Track when last BT transmission was received.
 const long btMinEscapeTime = 2000; // Bluetooth serial traffic must stop this amount before an escape char is recognized
