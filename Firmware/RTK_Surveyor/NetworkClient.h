@@ -332,8 +332,7 @@ class NetworkWiFiSslClient : public NetworkClient
 {
   protected:
 
-    WiFiClient _wifiClient;
-    SSLClientESP32 _sslClient;
+    WiFiClientSecure _sslClient;
 
   public:
 
@@ -341,7 +340,6 @@ class NetworkWiFiSslClient : public NetworkClient
         _sslClient(),
         NetworkClient(&_sslClient, NETWORK_TYPE_WIFI)
     {
-        _sslClient.setClient(&_wifiClient);
         _sslClient.setCACertBundle(x509CertificateBundle);
     }
 

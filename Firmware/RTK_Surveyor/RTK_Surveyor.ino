@@ -19,7 +19,7 @@
   Settings are loaded from microSD if available otherwise settings are pulled from ESP32's file system LittleFS.
 */
 
-#define COMPILE_ETHERNET // Comment out to remove Ethernet (W5500) support
+// #define COMPILE_ETHERNET // Comment out to remove Ethernet (W5500) support
 #define COMPILE_WIFI     // Comment out to remove WiFi functionality
 
 #ifdef  COMPILE_WIFI
@@ -79,8 +79,11 @@
 #include <WiFiMulti.h>        //Built-in.
 #endif // COMPILE_WIFI
 
-#if COMPILE_NETWORK
+#ifdef COMPILE_ETHERNET
 #include <SSLClientESP32.h> // http://librarymanager/All#SSLClientESP32
+#endif // COMPILE_ETHERNET
+
+#if COMPILE_NETWORK
 #include "X509_Certificate_Bundle.h" // Root certificates
 #endif // COMPILE_NETWORK
 
