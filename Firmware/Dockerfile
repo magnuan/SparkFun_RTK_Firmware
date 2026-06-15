@@ -2,7 +2,9 @@ FROM ubuntu:latest AS upstream
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-ARG CORE_VERSION=2.0.2
+#ARG CORE_VERSION=2.0.2
+# magnuan upgraded from core 2.0.2 to 2.0.17 to get support for Feather v2 
+ARG CORE_VERSION=2.0.17
 
 ARG FIRMWARE_VERSION_MAJOR=99
 ARG FIRMWARE_VERSION_MINOR=99
@@ -94,8 +96,11 @@ RUN cd ./Tools \
 RUN cp app3M_fat9M_16MB.csv "/root/.arduino15/packages/esp32/hardware/esp32/${CORE_VERSION}/tools/partitions/app3M_fat9M_16MB.csv"
 
 # Compile Sketch
+# magnuan changed fqbn to match feather v2 board used
+# For original HW, use fqbn   "esp32:esp32:esp32" 
+
 RUN cd ./RTK_Surveyor \
-    && arduino-cli compile --fqbn "esp32:esp32:esp32":DebugLevel=${DEBUG_LEVEL} \
+    && arduino-cli compile --fqbn "esp32:esp32:adafruit_feather_esp32_v2":DebugLevel=${DEBUG_LEVEL} \
     ./RTK_Surveyor.ino \
     --build-property build.partitions=app3M_fat9M_16MB \
     --build-property upload.maximum_size=3145728 \
