@@ -13,7 +13,7 @@ class BTSerialInterface
     virtual bool begin(String deviceName, bool isMaster, uint16_t rxQueueSize, uint16_t txQueueSize) = 0;
     virtual void disconnect() = 0;
     virtual void end() = 0;
-    virtual esp_err_t register_callback(esp_spp_cb_t *callback) = 0;
+    virtual esp_err_t register_callback(esp_spp_cb_t callback) = 0;
     virtual void setTimeout(unsigned long timeout) = 0;
 
     virtual int available() = 0;
@@ -46,7 +46,7 @@ class BTClassicSerial : public virtual BTSerialInterface, public BluetoothSerial
         BluetoothSerial::end();
     }
 
-    esp_err_t register_callback(esp_spp_cb_t *callback)
+    esp_err_t register_callback(esp_spp_cb_t callback)
     {
         return BluetoothSerial::register_callback(callback);
     }
@@ -107,7 +107,7 @@ class BTLESerial : public virtual BTSerialInterface, public BleSerial
         BleSerial::end();
     }
 
-    esp_err_t register_callback(esp_spp_cb_t *callback)
+    esp_err_t register_callback(esp_spp_cb_t callback)
     {
         connectionCallback = callback;
         return ESP_OK;
@@ -152,18 +152,20 @@ class BTLESerial : public virtual BTSerialInterface, public BleSerial
     void onConnect(BLEServer *pServer)
     {
         // bleConnected = true; Removed until PR is accepted
-        connectionCallback(ESP_SPP_SRV_OPEN_EVT, nullptr);
+        if (connectionCallback)
+            connectionCallback(ESP_SPP_SRV_OPEN_EVT, nullptr);
     }
 
     void onDisconnect(BLEServer *pServer)
     {
         // bleConnected = false; Removed until PR is accepted
-        connectionCallback(ESP_SPP_CLOSE_EVT, nullptr);
+        if (connectionCallback)
+            connectionCallback(ESP_SPP_CLOSE_EVT, nullptr);
         Server->startAdvertising();
     }
 
   private:
-    esp_spp_cb_t *connectionCallback;
+    esp_spp_cb_t connectionCallback = nullptr;
 };
 
 #endif  // COMPILE_BT

@@ -51,7 +51,7 @@ class BluetoothSerial: public Stream
         void flush();
         void end(void);
         void onData(BluetoothSerialDataCb cb);
-        esp_err_t register_callback(esp_spp_cb_t * callback);
+        esp_err_t register_callback(esp_spp_cb_t callback);
         
         void onConfirmRequest(ConfirmRequestCb cb);
         void onAuthComplete(AuthCompleteCb cb);
