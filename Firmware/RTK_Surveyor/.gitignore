@@ -3,3 +3,7 @@
 *.swp
 *.swo
 *.swn
+
+*.bin
+*.elf
+*.map
