@@ -50,6 +50,9 @@ bool idWithAdc(uint16_t mvMeasured, float r1, float r2)
 // used in tests accordingly.
 void identifyBoard()
 {
+    #if 1
+    productVariant = RTK_MAGNUAN_MOD;
+    #else
     // Use ADC to check the resistor divider
     int pin_deviceID = 35;
     uint16_t idValue = analogReadMilliVolts(pin_deviceID);
@@ -93,6 +96,7 @@ void identifyBoard()
         log_d("Out of band or nonexistent resistor IDs");
         productVariant = RTK_UNKNOWN; // Need to wait until the GNSS and Accel have been initialized
     }
+    #endif
 }
 
 // Setup any essential power pins
@@ -208,6 +212,13 @@ void beginBoard()
         // Bug in ZED-F9P v1.13 firmware causes RTK LED to not light when RTK Floating with SBAS on.
         // The following changes the POR default but will be overwritten by settings in NVM or settings file
         settings.ubxConstellations[1].enabled = false;
+    }
+    else if (productVariant == RTK_MAGNUAN_MOD)
+    {
+        // pin_zed_tx_ready = 26;
+        // pin_radio_rx = 33;
+        // pin_radio_tx = 32;
+        settings.enablePrintBatteryMessages = false; // No pesky battery messages
     }
     else if (productVariant == RTK_EXPRESS || productVariant == RTK_EXPRESS_PLUS)
     {
@@ -1076,7 +1087,23 @@ void beginSystemState()
         factoryReset(false); // We do not have the SD semaphore
     }
 
-    if (productVariant == RTK_SURVEYOR)
+    if (productVariant == RTK_MAGNUAN_MOD)
+    {
+        if (settings.lastState == STATE_NOT_SET) // Default
+        {
+            systemState = STATE_ROVER_NOT_STARTED;
+            settings.lastState = systemState;
+        }
+
+        if (online.lband == false)
+            systemState =
+                settings
+                    .lastState; // Return to either Rover or Base Not Started. The last state previous to power down.
+        else
+            systemState = STATE_KEYS_STARTED; // Begin process for getting new keys
+
+    }
+    else if (productVariant == RTK_SURVEYOR)
     {
         if (settings.lastState == STATE_NOT_SET) // Default
         {

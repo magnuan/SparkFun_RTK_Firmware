@@ -1087,7 +1087,7 @@ void updateSD()
         deleteSDSizeCheckTask();
 
     // Check if SD card is still present
-    if (productVariant == REFERENCE_STATION)
+    if (productVariant == REFERENCE_STATION || productVariant == RTK_MAGNUAN_MOD)
     {
         if (sdPresent() == false)
             endSD(false, true); //(alreadyHaveSemaphore, releaseSemaphore) Close down SD.

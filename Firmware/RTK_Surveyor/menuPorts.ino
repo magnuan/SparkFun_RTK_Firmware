@@ -1,6 +1,6 @@
 void menuPorts()
 {
-    if (productVariant == RTK_SURVEYOR || productVariant == REFERENCE_STATION)
+    if (productVariant == RTK_SURVEYOR || productVariant == REFERENCE_STATION || productVariant == RTK_MAGNUAN_MOD)
         menuPortsSurveyor();
     else if (productVariant == RTK_EXPRESS || productVariant == RTK_EXPRESS_PLUS || productVariant == RTK_FACET ||
              productVariant == RTK_FACET_LBAND || productVariant == RTK_FACET_LBAND_DIRECT)

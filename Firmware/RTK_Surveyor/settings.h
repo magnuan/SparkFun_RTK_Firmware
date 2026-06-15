@@ -83,6 +83,7 @@ typedef enum
     RTK_FACET_LBAND,
     REFERENCE_STATION,
     RTK_FACET_LBAND_DIRECT,
+    RTK_MAGNUAN_MOD,
     // Add new values just above this line
     RTK_UNKNOWN,
 } ProductVariant;
@@ -96,6 +97,7 @@ const char *const productDisplayNames[] = {
     "Facet LB",
     "Ref Stn",
     "Facet LD",
+    "RTK magnuan mod",
     // Add new values just above this line
     "Unknown",
 };
@@ -109,6 +111,7 @@ const char *const platformFilePrefixTable[] = {
     "SFE_Facet_LBand",
     "SFE_Reference_Station",
     "SFE_Facet_LBand_Direct",
+    "SFE_RTK magnuan mod",
     // Add new values just above this line
     "SFE_Unknown",
 };
@@ -122,6 +125,7 @@ const char *const platformPrefixTable[] = {
     "Facet L-Band",
     "Reference Station",
     "Facet L-Band Direct",
+    "RTK magnuan mod",
     // Add new values just above this line
     "Unknown",
 };
@@ -148,7 +152,7 @@ const int platformPrefixTableEntries = sizeof(platformPrefixTable) / sizeof(plat
 #define HAS_GNSS_TP_INT (productVariant == REFERENCE_STATION)
 
 // Macro to show if the the RTK variant has no battery
-#define HAS_NO_BATTERY (productVariant == REFERENCE_STATION)
+#define HAS_NO_BATTERY (productVariant == REFERENCE_STATION) || (productVariant == RTK_MAGNUAN_MOD)
 #define HAS_BATTERY (!HAS_NO_BATTERY)
 
 // Macro to show if the the RTK variant has antenna short circuit / open circuit detection
