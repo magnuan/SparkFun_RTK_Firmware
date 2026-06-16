@@ -84,6 +84,8 @@ bool configureUbloxModuleBase()
         {
             for (int x = 0; x < MAX_UBX_MSG_RTCM; x++)
             {
+                if (messageSupported(firstRTCMRecord + x) == false)
+                    continue;
                 response &= theGNSS.addCfgValset(ubxMessages[firstRTCMRecord + x].msgConfigKey - 1,
                                                  settings.ubxMessageRatesBase[x]); // UBLOX_CFG UART1 - 1 = I2C
                 response &= theGNSS.addCfgValset(ubxMessages[firstRTCMRecord + x].msgConfigKey,
@@ -98,6 +100,8 @@ bool configureUbloxModuleBase()
         {
             for (int x = 0; x < MAX_UBX_MSG_RTCM; x++)
             {
+                if (messageSupported(firstRTCMRecord + x) == false)
+                    continue;
                 response &= theGNSS.addCfgValset(ubxMessages[firstRTCMRecord + x].msgConfigKey + 3,
                                                  settings.ubxMessageRatesBase[x]); // UBLOX_CFG UART1 + 3 = SPI
 
@@ -119,6 +123,8 @@ bool configureUbloxModuleBase()
         // Update message rates for UART2 and USB
         for (int x = 0; x < MAX_UBX_MSG_RTCM; x++)
         {
+            if (messageSupported(firstRTCMRecord + x) == false)
+                continue;
             response &= theGNSS.addCfgValset(ubxMessages[firstRTCMRecord + x].msgConfigKey + 1,
                                              settings.ubxMessageRatesBase[x]); // UBLOX_CFG UART1 + 1 = UART2
             response &= theGNSS.addCfgValset(ubxMessages[firstRTCMRecord + x].msgConfigKey + 2,

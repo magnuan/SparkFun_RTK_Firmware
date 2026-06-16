@@ -1,3 +1,111 @@
+// Configure one u-blox key at a time and print the result. This is intentionally verbose
+// for bring-up on non-SparkFun GNSS modules where a single unsupported key may NACK the batch.
+bool roverConfigSetOne(const char *name, uint32_t key, uint32_t value)
+{
+    systemPrintf("Rover CFG %s key 0x%08lx value %lu: ", name, key, value);
+
+    if (!theGNSS.newCfgValset())
+    {
+        systemPrintln("newCfgValset failed");
+        return false;
+    }
+
+    if (!theGNSS.addCfgValset(key, value))
+    {
+        systemPrintln("addCfgValset failed");
+        return false;
+    }
+
+    if (!theGNSS.sendCfgValset())
+    {
+        systemPrintln("sendCfgValset failed or NACKed");
+        return false;
+    }
+
+    systemPrintln("ok");
+    return true;
+}
+
+bool configureUbloxModuleRoverDiagnostic()
+{
+    systemPrintf("Rover config diagnostic: module=%s firmware=%s protocol=%d.%02d zedModuleType=0x%02x\r\n",
+                 theGNSS.getModuleName(), zedFirmwareVersion, theGNSS.getProtocolVersionHigh(),
+                 theGNSS.getProtocolVersionLow(), zedModuleType);
+
+    uint16_t currentMeasurementRate = 0;
+    bool valgetOk = theGNSS.getVal16(UBLOX_CFG_RATE_MEAS, &currentMeasurementRate, VAL_LAYER_RAM, 1000);
+    systemPrintf("Rover VALGET CFG_RATE_MEAS: %s", valgetOk ? "ok" : "failed");
+    if (valgetOk)
+        systemPrintf(" value=%u", currentMeasurementRate);
+    systemPrintln();
+
+    if (!valgetOk)
+        return false;
+
+    bool success = true;
+
+    success &= roverConfigSetOne("CFG_RATE_MEAS", UBLOX_CFG_RATE_MEAS, settings.measurementRate);
+    success &= roverConfigSetOne("CFG_RATE_NAV", UBLOX_CFG_RATE_NAV, settings.navigationRate);
+
+    if (commandSupported(UBLOX_CFG_TMODE_MODE) == true)
+        success &= roverConfigSetOne("CFG_TMODE_MODE", UBLOX_CFG_TMODE_MODE, 0);
+
+    success &= roverConfigSetOne("CFG_NAVSPG_DYNMODEL", UBLOX_CFG_NAVSPG_DYNMODEL, (uint32_t)settings.dynamicModel);
+
+    int firstRTCMRecord = getMessageNumberByName("UBX_RTCM_1005");
+
+    if (ZED_MODULE_TYPE_IS_F9P_COMPATIBLE(zedModuleType))
+    {
+        char keyName[64];
+
+        if (USE_I2C_GNSS)
+        {
+            for (int x = 0; x < MAX_UBX_MSG_RTCM; x++)
+            {
+                if (messageSupported(firstRTCMRecord + x) == false)
+                    continue;
+                snprintf(keyName, sizeof(keyName), "%s_I2C", ubxMessages[firstRTCMRecord + x].msgTextName);
+                success &= roverConfigSetOne(keyName, ubxMessages[firstRTCMRecord + x].msgConfigKey - 1,
+                                             settings.ubxMessageRates[firstRTCMRecord + x]);
+            }
+        }
+        else
+        {
+            for (int x = 0; x < MAX_UBX_MSG_RTCM; x++)
+            {
+                if (messageSupported(firstRTCMRecord + x) == false)
+                    continue;
+                snprintf(keyName, sizeof(keyName), "%s_SPI", ubxMessages[firstRTCMRecord + x].msgTextName);
+                success &= roverConfigSetOne(keyName, ubxMessages[firstRTCMRecord + x].msgConfigKey + 3,
+                                             settings.ubxMessageRates[firstRTCMRecord + x]);
+            }
+        }
+
+        for (int x = 0; x < MAX_UBX_MSG_RTCM; x++)
+        {
+            if (messageSupported(firstRTCMRecord + x) == false)
+                continue;
+            snprintf(keyName, sizeof(keyName), "%s_UART2", ubxMessages[firstRTCMRecord + x].msgTextName);
+            success &= roverConfigSetOne(keyName, ubxMessages[firstRTCMRecord + x].msgConfigKey + 1,
+                                         settings.ubxMessageRates[firstRTCMRecord + x]);
+
+            snprintf(keyName, sizeof(keyName), "%s_USB", ubxMessages[firstRTCMRecord + x].msgTextName);
+            success &= roverConfigSetOne(keyName, ubxMessages[firstRTCMRecord + x].msgConfigKey + 2,
+                                         settings.ubxMessageRates[firstRTCMRecord + x]);
+        }
+    }
+
+    success &= roverConfigSetOne("CFG_NMEA_MAINTALKERID", UBLOX_CFG_NMEA_MAINTALKERID, 3);
+    success &= roverConfigSetOne("CFG_NMEA_HIGHPREC", UBLOX_CFG_NMEA_HIGHPREC, 1);
+    success &= roverConfigSetOne("CFG_NMEA_SVNUMBERING", UBLOX_CFG_NMEA_SVNUMBERING, 1);
+    success &= roverConfigSetOne("CFG_NAVSPG_INFIL_MINELEV", UBLOX_CFG_NAVSPG_INFIL_MINELEV, settings.minElev);
+
+    if (!success)
+        systemPrintln("Rover diagnostic config failed");
+
+    return success;
+}
+
 // Configure specific aspects of the receiver for rover mode
 bool configureUbloxModuleRover()
 {
@@ -19,6 +127,9 @@ bool configureUbloxModuleRover()
 
     theGNSS.checkUblox();     // Regularly poll to get latest data and any RTCM
     theGNSS.checkCallbacks(); // Process any callbacks: ie, storePVTdata
+
+    //if (productVariant == RTK_MAGNUAN_MOD)
+    //    return configureUbloxModuleRoverDiagnostic();
 
     bool success = false;
     int tryNo = -1;
@@ -55,27 +166,37 @@ bool configureUbloxModuleRover()
         // Find first RTCM record in ubxMessage array
         int firstRTCMRecord = getMessageNumberByName("UBX_RTCM_1005");
 
-        if (zedModuleType == PLATFORM_F9P)
+        if (ZED_MODULE_TYPE_IS_F9P_COMPATIBLE(zedModuleType))
         {
             if (USE_I2C_GNSS)
             {
                 // Set RTCM messages to user's settings
                 for (int x = 0; x < MAX_UBX_MSG_RTCM; x++)
+                {
+                    if (messageSupported(firstRTCMRecord + x) == false)
+                        continue;
                     response &= theGNSS.addCfgValset(
                         ubxMessages[firstRTCMRecord + x].msgConfigKey - 1,
                         settings.ubxMessageRates[firstRTCMRecord + x]); // UBLOX_CFG UART1 - 1 = I2C
+                }
             }
             else
             {
                 for (int x = 0; x < MAX_UBX_MSG_RTCM; x++)
+                {
+                    if (messageSupported(firstRTCMRecord + x) == false)
+                        continue;
                     response &= theGNSS.addCfgValset(
                         ubxMessages[firstRTCMRecord + x].msgConfigKey + 3,
                         settings.ubxMessageRates[firstRTCMRecord + x]); // UBLOX_CFG UART1 + 3 = SPI
+                }
             }
 
             // Set RTCM messages to user's settings
             for (int x = 0; x < MAX_UBX_MSG_RTCM; x++)
             {
+                if (messageSupported(firstRTCMRecord + x) == false)
+                    continue;
                 response &=
                     theGNSS.addCfgValset(ubxMessages[firstRTCMRecord + x].msgConfigKey + 1,
                                          settings.ubxMessageRates[firstRTCMRecord + x]); // UBLOX_CFG UART1 + 1 = UART2
@@ -84,15 +205,10 @@ bool configureUbloxModuleRover()
                                          settings.ubxMessageRates[firstRTCMRecord + x]); // UBLOX_CFG UART1 + 2 = USB
             }
         }
-
-        response &= theGNSS.addCfgValset(UBLOX_CFG_NMEA_MAINTALKERID,
-                                         3); // Return talker ID to GNGGA after NTRIP Client set to GPGGA
-
+        response &= theGNSS.addCfgValset(UBLOX_CFG_NMEA_MAINTALKERID,3); // Return talker ID to GNGGA after NTRIP Client set to GPGGA
         response &= theGNSS.addCfgValset(UBLOX_CFG_NMEA_HIGHPREC, 1);    // Enable high precision NMEA
         response &= theGNSS.addCfgValset(UBLOX_CFG_NMEA_SVNUMBERING, 1); // Enable extended satellite numbering
-
         response &= theGNSS.addCfgValset(UBLOX_CFG_NAVSPG_INFIL_MINELEV, settings.minElev); // Set minimum elevation
-
         response &= theGNSS.sendCfgValset(); // Closing
 
         if (response)
