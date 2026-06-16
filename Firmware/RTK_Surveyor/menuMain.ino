@@ -48,7 +48,7 @@ void menuMain()
 
         systemPrintln("2) Configure GNSS Messages");
 
-        if (zedModuleType == PLATFORM_F9P)
+        if (ZED_MODULE_TYPE_IS_F9P_COMPATIBLE(zedModuleType))
             systemPrintln("3) Configure Base");
         else if (zedModuleType == PLATFORM_F9R)
             systemPrintln("3) Configure Sensor Fusion");
@@ -102,7 +102,7 @@ void menuMain()
             menuGNSS();
         else if (incoming == 2)
             menuMessages();
-        else if (incoming == 3 && zedModuleType == PLATFORM_F9P)
+        else if (incoming == 3 && ZED_MODULE_TYPE_IS_F9P_COMPATIBLE(zedModuleType))
             menuBase();
         else if (incoming == 3 && zedModuleType == PLATFORM_F9R)
             menuSensorFusion();

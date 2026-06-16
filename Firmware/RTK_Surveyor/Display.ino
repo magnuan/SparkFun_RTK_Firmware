@@ -1432,7 +1432,7 @@ void paintDynamicModel()
         break;
     case (DYN_MODEL_AUTOMOTIVE):
         // Normal rover for ZED-F9P, fusion rover for ZED-F9R
-        if (zedModuleType == PLATFORM_F9P)
+        if (ZED_MODULE_TYPE_IS_F9P_COMPATIBLE(zedModuleType))
         {
             displayBitmap(28, 0, DynamicModel_Width, DynamicModel_Height, DynamicModel_4_Automotive);
         }
@@ -2344,8 +2344,17 @@ void paintSystemTest()
             oled.print("ZV:");
             oled.print(zedFirmwareVersionInt);
 
+            // ZED-X20P supports RTCM output from HPG 2.10
+            if (zedModuleType == PLATFORM_X20P)
+            {
+                if (zedFirmwareVersionInt < 210)
+                    oled.print("-FAI");
+                else
+                    oled.print("-OK");
+            }
+
             // ZED-F9P goes to 150
-            if (zedModuleType == PLATFORM_F9P)
+            else if (zedModuleType == PLATFORM_F9P)
             {
                 if (zedFirmwareVersionInt < 150)
                     oled.print("-FAI");
@@ -2645,7 +2654,7 @@ void paintDisplaySetupProfile(const char *firstState)
 // Show different menu 'buttons' to allow user to pause on one to select it
 void paintDisplaySetup()
 {
-    if (zedModuleType == PLATFORM_F9P)
+    if (ZED_MODULE_TYPE_IS_F9P_COMPATIBLE(zedModuleType))
     {
         if (setupState == STATE_MARK_EVENT)
         {

@@ -641,7 +641,9 @@ void createSettingsString(char *newSettings)
     if (!configureViaEthernet) // ZED type is unknown if we are in configure-via-ethernet mode
     {
         char apZedPlatform[50];
-        if (zedModuleType == PLATFORM_F9P)
+        if (zedModuleType == PLATFORM_X20P)
+            strcpy(apZedPlatform, "ZED-X20P");
+        else if (zedModuleType == PLATFORM_F9P)
             strcpy(apZedPlatform, "ZED-F9P");
         else if (zedModuleType == PLATFORM_F9R)
             strcpy(apZedPlatform, "ZED-F9R");

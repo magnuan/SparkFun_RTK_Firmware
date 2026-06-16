@@ -187,7 +187,7 @@ void menuMessages()
         systemPrintf("Active messages: %d\r\n", getActiveMessageCount());
 
         systemPrintln("1) Set NMEA Messages");
-        if (zedModuleType == PLATFORM_F9P)
+        if (ZED_MODULE_TYPE_IS_F9P_COMPATIBLE(zedModuleType))
             systemPrintln("2) Set RTCM Messages");
         else if (zedModuleType == PLATFORM_F9R)
             systemPrintln("2) Set ESF Messages");
@@ -210,7 +210,7 @@ void menuMessages()
 
         if (incoming == 1)
             menuMessagesSubtype(settings.ubxMessageRates, "NMEA_"); // The following _ avoids listing NMEANAV2 messages
-        else if (incoming == 2 && zedModuleType == PLATFORM_F9P)
+        else if (incoming == 2 && ZED_MODULE_TYPE_IS_F9P_COMPATIBLE(zedModuleType))
             menuMessagesSubtype(settings.ubxMessageRates, "RTCM");
         else if (incoming == 2 && zedModuleType == PLATFORM_F9R)
             menuMessagesSubtype(settings.ubxMessageRates, "ESF");

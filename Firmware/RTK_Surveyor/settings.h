@@ -488,7 +488,10 @@ typedef enum
     PLATFORM_F9P = 0b0001,
     PLATFORM_F9R = 0b0010,
     PLATFORM_F9T = 0b0100,
+    PLATFORM_X20P = 0b1000,
 } ubxPlatform;
+
+#define ZED_MODULE_TYPE_IS_F9P_COMPATIBLE(moduleType) (((moduleType) == PLATFORM_F9P) || ((moduleType) == PLATFORM_X20P))
 
 // Print the base coordinates in different formats, depending on the type the user has entered
 // These are the different supported types

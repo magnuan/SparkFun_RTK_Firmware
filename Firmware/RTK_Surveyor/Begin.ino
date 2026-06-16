@@ -168,7 +168,7 @@ void beginBoard()
     {
         if (isConnected(0x19) == true) // Check for accelerometer
         {
-            if (zedModuleType == PLATFORM_F9P)
+            if (ZED_MODULE_TYPE_IS_F9P_COMPATIBLE(zedModuleType))
                 productVariant = RTK_EXPRESS;
             else if (zedModuleType == PLATFORM_F9R)
                 productVariant = RTK_EXPRESS_PLUS;
@@ -183,7 +183,7 @@ void beginBoard()
             log_d("Alternate ID pinValue (mV): %d\r\n", pinValue); // Surveyor = 142 to 152, //Express = 3129
             if (pinValue > 3000)
             {
-                if (zedModuleType == PLATFORM_F9P)
+                if (ZED_MODULE_TYPE_IS_F9P_COMPATIBLE(zedModuleType))
                     productVariant = RTK_EXPRESS;
                 else if (zedModuleType == PLATFORM_F9R)
                     productVariant = RTK_EXPRESS_PLUS;
@@ -826,10 +826,15 @@ void beginGNSS()
         // Clear the module type. Default to PLATFORM_F9P below - if needed
         zedModuleType = 0;
 
-        // Determine if we have a ZED-F9P (Express/Facet) or an ZED-F9R (Express Plus/Facet Plus)
-        if (strstr(theGNSS.getModuleName(), "ZED-F9P") != nullptr)
+        const char *zedModuleName = theGNSS.getModuleName();
+        if (zedModuleName == nullptr)
+            zedModuleName = "";
+        // Determine if we have a ZED-F9P (Express/Facet), ZED-F9R (Express Plus/Facet Plus), or ZED-X20P
+        if (strstr(zedModuleName, "ZED-X20P") != nullptr)
+            zedModuleType = PLATFORM_X20P;
+        else if (strstr(zedModuleName, "ZED-F9P") != nullptr)
             zedModuleType = PLATFORM_F9P;
-        else if (strstr(theGNSS.getModuleName(), "ZED-F9R") != nullptr)
+        else if (strstr(zedModuleName, "ZED-F9R") != nullptr)
             zedModuleType = PLATFORM_F9R;
 
         // Reconstruct the firmware version
@@ -855,11 +860,18 @@ void beginGNSS()
                 knownFirmware = true;
         }
 
+        if ((zedModuleType == PLATFORM_X20P) && (zedFirmwareVersionInt >= 210))
+            knownFirmware = true;
+
         if (!knownFirmware)
         {
             systemPrintf("Unknown firmware version: %s\r\n", zedFirmwareVersion);
             // Let's be clever and allow ZED-F9P firmware versions higher than knownFirmwareVersions[0]
-            if ((zedModuleType == PLATFORM_F9P) && (zedFirmwareVersionInt > knownFirmwareVersions[0]))
+            if (zedModuleType == PLATFORM_X20P)
+            {
+                systemPrintln("ZED-X20P HPG < 2.10: RTCM output support may be limited");
+            }
+            else if ((zedModuleType == PLATFORM_F9P) && (zedFirmwareVersionInt > knownFirmwareVersions[0]))
             {
                 zedFirmwareVersionInt = knownFirmwareVersions[0];
                 systemPrintf("Assuming firmware compatibility with %d.%02d\r\n", zedFirmwareVersionInt / 100, zedFirmwareVersionInt % 100);
@@ -872,7 +884,7 @@ void beginGNSS()
 
         if (zedModuleType == 0)
         {
-            systemPrintf("Unknown ZED module: %s. Assuming compatibility with ZED-F9P\r\n", theGNSS.getModuleName());
+            systemPrintf("Unknown ZED module: %s. Assuming compatibility with ZED-F9P\r\n", zedModuleName);
             zedModuleType = PLATFORM_F9P;
         }
 

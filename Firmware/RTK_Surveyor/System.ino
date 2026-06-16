@@ -609,7 +609,12 @@ bool messageSupported(int messageNumber)
 {
     bool messageSupported = false;
 
-    if ((zedModuleType == PLATFORM_F9P) &&
+    if ((zedModuleType == PLATFORM_X20P) && (zedFirmwareVersionInt < 210) &&
+        ((ubxMessages[messageNumber].msgID == UBX_RTCM_4072_0) ||
+         (ubxMessages[messageNumber].msgID == UBX_RTCM_4072_1)))
+        return (false);
+
+    if (ZED_MODULE_TYPE_IS_F9P_COMPATIBLE(zedModuleType) &&
         (zedFirmwareVersionInt >= ubxMessages[messageNumber].f9pFirmwareVersionSupported))
         messageSupported = true;
     else if ((zedModuleType == PLATFORM_F9R) &&
@@ -637,7 +642,7 @@ bool commandSupported(const uint32_t key)
     }
     else
     {
-        if ((zedModuleType == PLATFORM_F9P) &&
+        if (ZED_MODULE_TYPE_IS_F9P_COMPATIBLE(zedModuleType) &&
             (zedFirmwareVersionInt >= ubxCommands[commandNumber].f9pFirmwareVersionSupported))
             commandSupported = true;
         else if ((zedModuleType == PLATFORM_F9R) &&
@@ -856,7 +861,7 @@ bool setConstellations(bool sendCompleteBatch)
     response &= theGNSS.addCfgValset(UBLOX_CFG_SIGNAL_QZSS_L1CA_ENA, settings.ubxConstellations[4].enabled);
 
     // UBLOX_CFG_SIGNAL_QZSS_L1S_ENA not supported on F9R in v1.21 and below
-    if (zedModuleType == PLATFORM_F9P)
+    if (ZED_MODULE_TYPE_IS_F9P_COMPATIBLE(zedModuleType))
         response &= theGNSS.addCfgValset(UBLOX_CFG_SIGNAL_QZSS_L1S_ENA, settings.ubxConstellations[4].enabled);
     else if ((zedModuleType == PLATFORM_F9R) && (zedFirmwareVersionInt > 121))
         response &= theGNSS.addCfgValset(UBLOX_CFG_SIGNAL_QZSS_L1S_ENA, settings.ubxConstellations[4].enabled);
