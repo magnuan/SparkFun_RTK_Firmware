@@ -741,7 +741,7 @@ bool sdCardForcedOffline = false; //Goes true if a isPresent() test passes, but 
 
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-#define DEAD_MAN_WALKING_ENABLED    1
+#define DEAD_MAN_WALKING_ENABLED    0
 
 #if DEAD_MAN_WALKING_ENABLED
 
@@ -955,7 +955,6 @@ void setup()
     DMW_c("beginIdleTasks");
     beginIdleTasks(); // Enable processor load calculations
 
-    // TODO: HERE BE PROBLEM, NO SERIAL COMMUNICATION WITH ZED
     DMW_c("beginUART2");
     beginUART2(); // Start UART2 on core 0, used to receive serial from ZED and pass out over SPP
 
