@@ -546,6 +546,8 @@ const char *otaGetUrl()
     return enableRCFirmware ? OTA_RC_FIRMWARE_JSON_URL : OTA_FIRMWARE_JSON_URL;
 }
 
+#ifdef COMPILE_OTA
+
 // Returns true if we successfully got the versionAvailable
 // Modifies versionAvailable with OTA getVersion response
 // Connects to WiFi as needed
@@ -735,6 +737,28 @@ const char *otaPullErrorText(int code)
 #endif // COMPILE_WIFI
     return "Unknown error";
 }
+
+#else  // COMPILE_OTA
+
+bool otaCheckVersion(char *versionAvailable, uint8_t versionAvailableLength)
+{
+    if (versionAvailableLength > 0)
+        versionAvailable[0] = 0;
+    systemPrintln("OTA firmware updates not compiled");
+    return false;
+}
+
+void otaUpdate()
+{
+    systemPrintln("OTA firmware updates not compiled");
+}
+
+const char *otaPullErrorText(int code)
+{
+    return "OTA firmware updates not compiled";
+}
+
+#endif // COMPILE_OTA
 
 // Returns true if reportedVersion is newer than currentVersion
 // Version number comes in as v2.7-Jan 5 2023

@@ -25,11 +25,12 @@
 #ifdef  COMPILE_WIFI
 #define COMPILE_AP       // Requires WiFi. Comment out to remove Access Point functionality
 #define COMPILE_ESPNOW   // Requires WiFi. Comment out to remove ESP-Now functionality.
+// #define COMPILE_OTA      // Requires WiFi. Comment out to remove OTA firmware update functionality.
 #endif  // COMPILE_WIFI
 
 #define COMPILE_BT       // Comment out to remove Bluetooth functionality
-#define COMPILE_L_BAND   // Comment out to remove L-Band functionality
-#define COMPILE_SD_MMC   // Comment out to remove REFERENCE_STATION microSD SD_MMC support
+// #define COMPILE_L_BAND   // Comment out to remove L-Band functionality
+// #define COMPILE_SD_MMC   // Comment out to remove REFERENCE_STATION microSD SD_MMC support
 // #define REF_STN_GNSS_DEBUG //Uncomment this line to output GNSS library debug messages on serialGNSS. Ref Stn only.
 // Needs ENABLE_DEVELOPER
 
@@ -68,12 +69,16 @@
 #endif // COMPILE_ETHERNET
 
 #ifdef COMPILE_WIFI
+#ifdef COMPILE_OTA
 #include "ESP32OTAPull.h" //http://librarymanager/All#ESP-OTA-Pull Used for getting
+#endif // COMPILE_OTA
 #include "esp_wifi.h" //Needed for esp_wifi_set_protocol()
 #include <DNSServer.h>        //Built-in.
 #include <ESPmDNS.h>      //Built-in.
+#ifdef COMPILE_L_BAND
 #include <HTTPClient.h>   //Built-in. Needed for ThingStream API for ZTP
 #include <PubSubClient.h> //http://librarymanager/All#PubSubClient_MQTT_Lightweight by Nick O'Leary v2.8.0 Used for MQTT obtaining of keys
+#endif // COMPILE_L_BAND
 #include <WiFi.h>             //Built-in.
 #include <WiFiClientSecure.h> //Built-in.
 #include <WiFiMulti.h>        //Built-in.

@@ -15,7 +15,7 @@ OtaClient.ino
 
 ------------------------------------------------------------------------------*/
 
-#if COMPILE_NETWORK
+#if COMPILE_NETWORK && defined(COMPILE_OTA)
 
 //----------------------------------------
 // Constants
@@ -865,4 +865,4 @@ void otaVerifyTables()
         reportFatalError("Fix otaStateNames table to match OtaState");
 }
 
-#endif  // COMPILE_NETWORK
+#endif  // COMPILE_NETWORK && defined(COMPILE_OTA)

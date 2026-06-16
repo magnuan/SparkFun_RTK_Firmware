@@ -67,12 +67,6 @@ void ntripServerUpdate() {}
 void ntripServerValidateTables() {}
 
 //----------------------------------------
-// OTA client
-//----------------------------------------
-
-void otaVerifyTables() {}
-
-//----------------------------------------
 // PVT client
 //----------------------------------------
 
@@ -104,6 +98,18 @@ void pvtServerValidateTables() {}
 void discardPvtServerBytes(RING_BUFFER_OFFSET previousTail, RING_BUFFER_OFFSET newTail) {}
 
 #endif // COMPILE_NETWORK
+
+#if !COMPILE_NETWORK || !defined(COMPILE_OTA)
+
+//----------------------------------------
+// OTA client
+//----------------------------------------
+
+void otaClientUpdate() {}
+void otaStop() {}
+void otaVerifyTables() {}
+
+#endif // !COMPILE_NETWORK || !defined(COMPILE_OTA)
 
 //----------------------------------------
 // Web Server
