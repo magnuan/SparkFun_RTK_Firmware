@@ -459,13 +459,24 @@ bool setRate(double secondsBetweenSolutions)
 // Print the module type and firmware version
 void printZEDInfo()
 {
-    if (zedModuleType == PLATFORM_F9P)
-        systemPrintf("ZED-F9P firmware: %s\r\n", zedFirmwareVersion);
+    const char *zedModuleName = theGNSS.getModuleName();
+
+    if ((zedModuleName != nullptr) && (zedModuleName[0] != '\0'))
+        systemPrintf("%s firmware: %s, protocol: %d.%02d\r\n", zedModuleName, zedFirmwareVersion,
+                     theGNSS.getProtocolVersionHigh(), theGNSS.getProtocolVersionLow());
+    else if (zedModuleType == PLATFORM_X20P)
+        systemPrintf("ZED-X20P firmware: %s, protocol: %d.%02d\r\n", zedFirmwareVersion,
+                     theGNSS.getProtocolVersionHigh(), theGNSS.getProtocolVersionLow());
+    else if (zedModuleType == PLATFORM_F9P)
+        systemPrintf("ZED-F9P firmware: %s, protocol: %d.%02d\r\n", zedFirmwareVersion,
+                     theGNSS.getProtocolVersionHigh(), theGNSS.getProtocolVersionLow());
     else if (zedModuleType == PLATFORM_F9R)
-        systemPrintf("ZED-F9R firmware: %s\r\n", zedFirmwareVersion);
+        systemPrintf("ZED-F9R firmware: %s, protocol: %d.%02d\r\n", zedFirmwareVersion,
+                     theGNSS.getProtocolVersionHigh(), theGNSS.getProtocolVersionLow());
     else
         // This will never be printed as beginGNSS defaults zedModuleType to PLATFORM_F9P
-        systemPrintf("Unknown module with firmware: %s\r\n", zedFirmwareVersion);
+        systemPrintf("Unknown module with firmware: %s, protocol: %d.%02d\r\n", zedFirmwareVersion,
+                     theGNSS.getProtocolVersionHigh(), theGNSS.getProtocolVersionLow());
 }
 
 // Print the NEO firmware version
