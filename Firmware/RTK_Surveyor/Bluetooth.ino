@@ -316,8 +316,10 @@ void bluetoothTest(bool runTest)
 
             theGNSS.setVal32(UBLOX_CFG_UART1_BAUDRATE,
                              (115200 * 2)); // Defaults to 230400 to maximize message output support
-            serialGNSS.begin((115200 * 2)); // UART2 on pins 16/17 for SPP. The ZED-F9P will be configured to output
-                                            // NMEA over its UART1 at the same rate.
+            if (pin_radio_tx < 0 || pin_radio_rx < 0) // Use default pins for UART2
+                serialGNSS.begin((115200 * 2));
+            else // Use specific IO pins for UART2
+                serialGNSS.begin((115200 * 2), SERIAL_8N1, pin_radio_tx, pin_radio_rx);
 
             SFE_UBLOX_GNSS_SERIAL myGNSS;
             if (myGNSS.begin(serialGNSS) == true) // begin() attempts 3 connections
@@ -330,8 +332,15 @@ void bluetoothTest(bool runTest)
 
             theGNSS.setVal32(UBLOX_CFG_UART1_BAUDRATE,
                              settings.dataPortBaud); // Defaults to 230400 to maximize message output support
-            serialGNSS.begin(settings.dataPortBaud); // UART2 on pins 16/17 for SPP. The ZED-F9P will be configured to
-                                                     // output NMEA over its UART1 at the same rate.
+
+
+            if (pin_radio_tx<0 || pin_radio_rx<0){ //Use default pins for UART2
+                serialGNSS.begin(settings.dataPortBaud); // UART2 on pins 16/17 for SPP. The ZED-F9P will be configured to
+            }
+            else{   //Use specific IO pins for UART2
+                serialGNSS.begin(settings.dataPortBaud, SERIAL_8N1, pin_radio_tx, pin_radio_rx);
+            }
+            
 
             tasksStartUART2(); // Return to normal operation
         }

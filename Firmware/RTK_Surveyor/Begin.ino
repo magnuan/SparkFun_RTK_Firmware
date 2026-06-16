@@ -216,8 +216,8 @@ void beginBoard()
     else if (productVariant == RTK_MAGNUAN_MOD)
     {
         // pin_zed_tx_ready = 26;
-        // pin_radio_rx = 33;
-        // pin_radio_tx = 32;
+        pin_radio_rx = 8; // ESP TX, connect to GNSS RX
+        pin_radio_tx = 7; // ESP RX, connect to GNSS TX
         settings.enablePrintBatteryMessages = false; // No pesky battery messages
     }
     else if (productVariant == RTK_EXPRESS || productVariant == RTK_EXPRESS_PLUS)
@@ -670,7 +670,12 @@ void pinUART2Task(void *pvParameters)
         serialGNSS.setRxBufferSize(
             settings.uartReceiveBufferSize); // TODO: work out if we can reduce or skip this when using SPI GNSS
         serialGNSS.setTimeout(settings.serialTimeoutGNSS); // Requires serial traffic on the UART pins for detection
-        serialGNSS.begin(settings.dataPortBaud); // UART2 on pins 16/17 for SPP. The ZED-F9P will be configured to
+        if (pin_radio_tx<0 || pin_radio_rx<0){ //Use default pins for UART2
+            serialGNSS.begin(settings.dataPortBaud); // UART2 on pins 16/17 for SPP. The ZED-F9P will be configured to
+        }
+        else{   //Use specific IO pins for UART2
+            serialGNSS.begin(settings.dataPortBaud, SERIAL_8N1, pin_radio_tx, pin_radio_rx);
+        }
                                                  // output NMEA over its UART1 at the same rate.
 
         // Reduce threshold value above which RX FIFO full interrupt is generated

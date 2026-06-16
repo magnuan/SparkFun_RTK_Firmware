@@ -444,7 +444,7 @@ float battChangeRate = 0.0;
 #define platformPrefix      platformPrefixTable[productVariant] // Sets the prefix for broadcast names
 
 #include <driver/uart.h>      //Required for uart_set_rx_full_threshold() on cores <v2.0.5
-HardwareSerial serialGNSS(2); // TX on 17, RX on 16
+HardwareSerial serialGNSS(2); // TX on 17, RX on 16 if pin_radio_rx/tx not set explicit
 
 #define SERIAL_SIZE_TX 512
 uint8_t wBuffer[SERIAL_SIZE_TX]; // Buffer for writing from incoming SPP to F9P
@@ -955,6 +955,7 @@ void setup()
     DMW_c("beginIdleTasks");
     beginIdleTasks(); // Enable processor load calculations
 
+    // TODO: HERE BE PROBLEM, NO SERIAL COMMUNICATION WITH ZED
     DMW_c("beginUART2");
     beginUART2(); // Start UART2 on core 0, used to receive serial from ZED and pass out over SPP
 
