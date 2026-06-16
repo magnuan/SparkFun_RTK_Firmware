@@ -741,7 +741,7 @@ bool sdCardForcedOffline = false; //Goes true if a isPresent() test passes, but 
 
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-#define DEAD_MAN_WALKING_ENABLED    0
+#define DEAD_MAN_WALKING_ENABLED    1
 
 #if DEAD_MAN_WALKING_ENABLED
 
@@ -759,6 +759,7 @@ volatile bool deadManWalking;
 #define START_DEAD_MAN_WALKING                          \
 {                                                       \
     deadManWalking = true;                              \
+    Serial.println("Dead man walking enabled");        \
                                                         \
     /* Output as much as possible to identify the location of the failure */    \
     settings.printDebugMessages = true;                 \
@@ -804,6 +805,7 @@ volatile bool deadManWalking;
 #define DMW_r(string)
 #define DMW_rs(string, status)
 #define DMW_st(routine, state)
+#define START_DEAD_MAN_WALKING
 
 #endif  // 0
 
@@ -897,6 +899,7 @@ void setup()
     initializeGlobals(); // Initialize any global variables that can't be given default values
 
     Serial.begin(115200); // UART0 for programming and debugging
+    START_DEAD_MAN_WALKING;
 
     DMW_c("verifyTables");
     verifyTables (); // Verify the consistency of the internal tables
@@ -1063,6 +1066,9 @@ void loop()
 // Capture card size when mounted
 void updateSD()
 {
+    if (!HAS_MICROSD)
+        return;
+
     if (online.microSD == false)
     {
         // Are we offline because we are out of space?

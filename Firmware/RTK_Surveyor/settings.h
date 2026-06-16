@@ -137,7 +137,8 @@ const int platformPrefixTableEntries = sizeof(platformPrefixTable) / sizeof(plat
 
 // Macros to show if the microSD is SPI or SDIO
 #define USE_MMC_MICROSD (productVariant == REFERENCE_STATION)
-#define USE_SPI_MICROSD (!USE_MMC_MICROSD)
+#define USE_SPI_MICROSD (!USE_MMC_MICROSD && (pin_microSD_CS >= 0))
+#define HAS_MICROSD (USE_MMC_MICROSD || USE_SPI_MICROSD)
 
 // Macro to show if the the RTK variant has Ethernet
 #ifdef COMPILE_ETHERNET

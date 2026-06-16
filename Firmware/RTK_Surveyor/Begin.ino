@@ -374,7 +374,7 @@ void beginBoard()
 
 void beginSD()
 {
-    if(sdCardForcedOffline == true)
+    if ((sdCardForcedOffline == true) || (!HAS_MICROSD))
         return;
 
     bool gotSemaphore;
@@ -579,7 +579,7 @@ void endSD(bool alreadyHaveSemaphore, bool releaseSemaphore)
     }
 
     // Release the semaphore
-    if (releaseSemaphore)
+    if (releaseSemaphore && sdCardSemaphore)
         xSemaphoreGive(sdCardSemaphore);
 }
 

@@ -40,6 +40,9 @@
 // This test takes approximately 13ms to complete
 bool sdPresent(void)
 {
+    if (!HAS_MICROSD)
+        return (false);
+
     if (productVariant == REFERENCE_STATION)
     {
         if (pin_microSD_CardDetect > 0)
