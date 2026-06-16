@@ -92,8 +92,8 @@ RUN cd ./Tools \
     && python index_html_zipper.py ../RTK_Surveyor/AP-Config/index.html ../RTK_Surveyor/form.h \
     && python main_js_zipper.py ../RTK_Surveyor/AP-Config/src/main.js ../RTK_Surveyor/form.h
 
-# Copy custom app3M_fat9M_16MB.csv
-RUN cp app3M_fat9M_16MB.csv "/root/.arduino15/packages/esp32/hardware/esp32/${CORE_VERSION}/tools/partitions/app3M_fat9M_16MB.csv"
+# Copy custom 8MB partition table for ESP32 Feather V2
+RUN cp app6M_spiffs1900K_8MB.csv "/root/.arduino15/packages/esp32/hardware/esp32/${CORE_VERSION}/tools/partitions/app6M_spiffs1900K_8MB.csv"
 
 # Compile Sketch
 # magnuan changed fqbn to match feather v2 board used
@@ -102,8 +102,8 @@ RUN cp app3M_fat9M_16MB.csv "/root/.arduino15/packages/esp32/hardware/esp32/${CO
 RUN cd ./RTK_Surveyor \
     && arduino-cli compile --fqbn "esp32:esp32:adafruit_feather_esp32_v2":DebugLevel=${DEBUG_LEVEL} \
     ./RTK_Surveyor.ino \
-    --build-property build.partitions=app3M_fat9M_16MB \
-    --build-property upload.maximum_size=3145728 \
+    --build-property build.partitions=app6M_spiffs1900K_8MB \
+    --build-property upload.maximum_size=6291456 \
     --build-property "compiler.cpp.extra_flags=\"-DPOINTPERFECT_TOKEN=${POINTPERFECT_TOKEN}\" \
     \"-DFIRMWARE_VERSION_MAJOR=${FIRMWARE_VERSION_MAJOR}\" \
     \"-DFIRMWARE_VERSION_MINOR=${FIRMWARE_VERSION_MINOR}\" \
@@ -112,5 +112,5 @@ RUN cd ./RTK_Surveyor \
 
 # Copy the compile output. List the files
 FROM deployment AS output
-COPY --from=deployment ./RTK_Surveyor/build/esp32.esp32.esp32 /
+COPY --from=deployment ./RTK_Surveyor/build/esp32.esp32.adafruit_feather_esp32_v2 /
 CMD echo $(ls /*.*)
