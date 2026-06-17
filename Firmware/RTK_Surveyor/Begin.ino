@@ -820,8 +820,10 @@ void beginGNSS()
     // Auto-send Valset messages before the buffer is completely full
     theGNSS.autoSendCfgValsetAtSpaceRemaining(16);
 
+    // SparkFun’s library default config payload buffer is 246 bytes, but their own example notes getModuleInfo can need up to about 348 bytes on some modules
+    theGNSS.setPacketCfgPayloadSize(384);
     // Check the firmware version of the ZED-F9P. Based on Example21_ModuleInfo.
-    if (theGNSS.getModuleInfo(1100) == true) // Try to get the module info
+    if (theGNSS.getModuleInfo(2000) == true) // Try to get the module info
     {
         // Clear the module type. Default to PLATFORM_F9P below - if needed
         zedModuleType = 0;
@@ -890,7 +892,9 @@ void beginGNSS()
 
         printZEDInfo(); // Print module type and firmware version
     }
-
+    else{
+        systemPrintln("getModuleInfo failed");
+    }
     UBX_SEC_UNIQID_data_t chipID;
     if (theGNSS.getUniqueChipId(&chipID))
     {
