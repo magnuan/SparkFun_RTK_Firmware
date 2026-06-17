@@ -609,10 +609,22 @@ bool messageSupported(int messageNumber)
 {
     bool messageSupported = false;
 
-    if ((zedModuleType == PLATFORM_X20P) && (zedFirmwareVersionInt < 210) &&
-        ((ubxMessages[messageNumber].msgID == UBX_RTCM_4072_0) ||
-         (ubxMessages[messageNumber].msgID == UBX_RTCM_4072_1)))
-        return (false);
+    if (zedModuleType == PLATFORM_X20P)
+    {
+        if ((ubxMessages[messageNumber].msgID == UBX_MON_HW2) ||
+            (ubxMessages[messageNumber].msgID == UBX_MON_HW) ||
+            (ubxMessages[messageNumber].msgID == UBX_MON_IO) ||
+            (ubxMessages[messageNumber].msgID == UBX_MON_MSGPP) ||
+            (ubxMessages[messageNumber].msgID == UBX_MON_RXBUF) ||
+            (ubxMessages[messageNumber].msgID == UBX_MON_TXBUF) ||
+            (ubxMessages[messageNumber].msgID == UBX_RXM_RTCM))
+            return (false);
+
+        if ((zedFirmwareVersionInt < 210) &&
+            ((ubxMessages[messageNumber].msgID == UBX_RTCM_4072_0) ||
+             (ubxMessages[messageNumber].msgID == UBX_RTCM_4072_1)))
+            return (false);
+    }
 
     if (ZED_MODULE_TYPE_IS_F9P_COMPATIBLE(zedModuleType) &&
         (zedFirmwareVersionInt >= ubxMessages[messageNumber].f9pFirmwareVersionSupported))
@@ -662,6 +674,9 @@ bool setMessages(int maxRetries)
     if (USE_SPI_GNSS)
         spiOffset = 3;
 
+
+    const uint16_t cfgValsetMaxWait = 1100;
+
     bool success = false;
     int tryNo = -1;
 
@@ -674,8 +689,10 @@ bool setMessages(int maxRetries)
         bool response = true;
         int messageNumber = 0;
 
-        while (messageNumber < MAX_UBX_MSG)
+        while (messageNumber < MAX_UBX_MSG)  //Set messages in batches inside this wile loop, until all messages are done
         {
+            int batchStartMessageNumber = messageNumber;
+
             response &= theGNSS.newCfgValset();
 
             do
@@ -722,18 +739,28 @@ bool setMessages(int maxRetries)
                                     rate = 1;
                     }
 
-                    response &= theGNSS.addCfgValset(ubxMessages[messageNumber].msgConfigKey + spiOffset, rate);
+                    uint32_t configKey = ubxMessages[messageNumber].msgConfigKey + spiOffset;
+                    bool added = theGNSS.addCfgValset(configKey, rate);
+                    if (added == false)
+                    {
+                        systemPrintf("setMessages: addCfgValset failed for %s key 0x%08lX rate %d. Try %d of %d.\r\n",
+                                     ubxMessages[messageNumber].msgTextName, (unsigned long)configKey, rate, tryNo + 1,
+                                     maxRetries);
+                    }
+                    response &= added;
                 }
                 messageNumber++;
             } while (((messageNumber % 43) < 42) &&
                      (messageNumber < MAX_UBX_MSG)); // Limit 1st batch to 42. Batches after that will be (up to) 43 in
                                                      // size. It's a HHGTTG thing.
 
-            if (theGNSS.sendCfgValset() == false)
+            if (theGNSS.sendCfgValset(cfgValsetMaxWait) == false)
             {
-                log_d("sendCfg failed at messageNumber %d %s. Try %d of %d.", messageNumber - 1,
-                      (messageNumber - 1) < MAX_UBX_MSG ? ubxMessages[messageNumber - 1].msgTextName : "", tryNo + 1,
-                      maxRetries);
+                int batchEndMessageNumber = messageNumber - 1;
+                systemPrintf("setMessages: sendCfgValset failed for messages %d-%d (%s..%s). Try %d of %d.\r\n",
+                             batchStartMessageNumber, batchEndMessageNumber,
+                             ubxMessages[batchStartMessageNumber].msgTextName,
+                             ubxMessages[batchEndMessageNumber].msgTextName, tryNo + 1, maxRetries);
                 response &= false; // If any one of the Valset fails, report failure overall
             }
         }
