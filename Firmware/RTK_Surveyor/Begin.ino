@@ -99,11 +99,24 @@ void identifyBoard()
     #endif
 }
 
+void setMagnuanModPins()
+{
+    // pin_zed_tx_ready = 26;
+    pin_gnss_rx = 21;   // ESP TX, connect to GNSS RX
+    pin_gnss_tx = 7;    // ESP RX, connect to GNSS TX
+    pin_gnss_sda = 19;  // ESP / GNSS I2C SDA
+    pin_gnss_scl = 8;   // ESP / GNSS I2C SCL
+}
+
 // Setup any essential power pins
 // E.g. turn on power for the display before beginDisplay
 void initializePowerPins()
 {
-    if (productVariant == REFERENCE_STATION)
+    if (productVariant == RTK_MAGNUAN_MOD)
+    {
+        setMagnuanModPins();
+    }
+    else if (productVariant == REFERENCE_STATION)
     {
         // v10
         // Pin Allocations:
@@ -215,9 +228,7 @@ void beginBoard()
     }
     else if (productVariant == RTK_MAGNUAN_MOD)
     {
-        // pin_zed_tx_ready = 26;
-        pin_radio_rx = 8; // ESP TX, connect to GNSS RX
-        pin_radio_tx = 7; // ESP RX, connect to GNSS TX
+        setMagnuanModPins();
         settings.enablePrintBatteryMessages = false; // No pesky battery messages
     }
     else if (productVariant == RTK_EXPRESS || productVariant == RTK_EXPRESS_PLUS)
@@ -670,11 +681,11 @@ void pinUART2Task(void *pvParameters)
         serialGNSS.setRxBufferSize(
             settings.uartReceiveBufferSize); // TODO: work out if we can reduce or skip this when using SPI GNSS
         serialGNSS.setTimeout(settings.serialTimeoutGNSS); // Requires serial traffic on the UART pins for detection
-        if (pin_radio_tx<0 || pin_radio_rx<0){ //Use default pins for UART2
+        if (pin_gnss_tx<0 || pin_gnss_rx<0){ //Use default pins for UART2
             serialGNSS.begin(settings.dataPortBaud); // UART2 on pins 16/17 for SPP. The ZED-F9P will be configured to
         }
         else{   //Use specific IO pins for UART2
-            serialGNSS.begin(settings.dataPortBaud, SERIAL_8N1, pin_radio_tx, pin_radio_rx);
+            serialGNSS.begin(settings.dataPortBaud, SERIAL_8N1, pin_gnss_tx, pin_gnss_rx);
         }
                                                  // output NMEA over its UART1 at the same rate.
 
@@ -1317,7 +1328,10 @@ void pinI2CTask(void *pvParameters)
     bool i2cBusAvailable;
     uint32_t timer;
 
-    Wire.begin(); // Start I2C on core the core that was chosen when the task was started
+    if (pin_gnss_sda < 0 || pin_gnss_scl < 0) // Use default I2C pins
+        Wire.begin(); // Start I2C on core the core that was chosen when the task was started
+    else // Use specific IO pins for I2C
+        Wire.begin(pin_gnss_sda, pin_gnss_scl);
     // Wire.setClock(400000);
 
     // Display the device addresses

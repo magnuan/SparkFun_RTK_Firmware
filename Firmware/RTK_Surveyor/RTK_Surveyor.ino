@@ -138,6 +138,11 @@ int pin_radio_pwr = -1;
 int pin_radio_cts = -1;
 int pin_radio_rts = -1;
 
+int pin_gnss_rx = -1;
+int pin_gnss_tx = -1;
+int pin_gnss_sda = -1;
+int pin_gnss_scl = -1;
+
 int pin_Ethernet_CS = -1;
 int pin_Ethernet_Interrupt = -1;
 int pin_GNSS_CS = -1;
@@ -444,7 +449,7 @@ float battChangeRate = 0.0;
 #define platformPrefix      platformPrefixTable[productVariant] // Sets the prefix for broadcast names
 
 #include <driver/uart.h>      //Required for uart_set_rx_full_threshold() on cores <v2.0.5
-HardwareSerial serialGNSS(2); // TX on 17, RX on 16 if pin_radio_rx/tx not set explicit
+HardwareSerial serialGNSS(2); // TX on 17, RX on 16 if pin_gnss_rx/tx not set explicit
 
 #define SERIAL_SIZE_TX 512
 uint8_t wBuffer[SERIAL_SIZE_TX]; // Buffer for writing from incoming SPP to F9P
