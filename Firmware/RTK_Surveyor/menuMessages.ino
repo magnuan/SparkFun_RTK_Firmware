@@ -398,6 +398,10 @@ void menuMessagesSubtype(uint8_t *localMessageRate, const char *messageType)
                 systemPrintf("%d) Message %s: ", x + 1, ubxMessages[x + startOfBlock + rtcmOffset].msgTextName);
                 systemPrintln(localMessageRate[x + startOfBlock]);
             }
+            else
+            {
+                //systemPrintf("%d) Unsupported %s: \n", x + 1, ubxMessages[x + startOfBlock + rtcmOffset].msgTextName);
+            }
         }
 
         systemPrintln("x) Exit");

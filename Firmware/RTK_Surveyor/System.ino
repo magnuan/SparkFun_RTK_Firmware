@@ -611,16 +611,20 @@ bool messageSupported(int messageNumber)
 
     if (zedModuleType == PLATFORM_X20P)
     {
-        if ((ubxMessages[messageNumber].msgID == UBX_MON_HW2) ||
-            (ubxMessages[messageNumber].msgID == UBX_MON_HW) ||
-            (ubxMessages[messageNumber].msgID == UBX_MON_IO) ||
-            (ubxMessages[messageNumber].msgID == UBX_MON_MSGPP) ||
-            (ubxMessages[messageNumber].msgID == UBX_MON_RXBUF) ||
-            (ubxMessages[messageNumber].msgID == UBX_MON_TXBUF) ||
+        if ((ubxMessages[messageNumber].msgClass == UBX_CLASS_MON) &&
+            ((ubxMessages[messageNumber].msgID == UBX_MON_HW2) ||
+             (ubxMessages[messageNumber].msgID == UBX_MON_HW) ||
+             (ubxMessages[messageNumber].msgID == UBX_MON_IO) ||
+             (ubxMessages[messageNumber].msgID == UBX_MON_MSGPP) ||
+             (ubxMessages[messageNumber].msgID == UBX_MON_RXBUF) ||
+             (ubxMessages[messageNumber].msgID == UBX_MON_TXBUF)))
+            return (false);
+
+        if ((ubxMessages[messageNumber].msgClass == UBX_CLASS_RXM) &&
             (ubxMessages[messageNumber].msgID == UBX_RXM_RTCM))
             return (false);
 
-        if ((zedFirmwareVersionInt < 210) &&
+        if ((zedFirmwareVersionInt < 210) && (ubxMessages[messageNumber].msgClass == UBX_RTCM_MSB) &&
             ((ubxMessages[messageNumber].msgID == UBX_RTCM_4072_0) ||
              (ubxMessages[messageNumber].msgID == UBX_RTCM_4072_1)))
             return (false);
