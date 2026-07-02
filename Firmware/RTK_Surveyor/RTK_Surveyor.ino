@@ -92,7 +92,14 @@
 #include "X509_Certificate_Bundle.h" // Root certificates
 #endif // COMPILE_NETWORK
 
+
+
 #include "settings.h"
+
+#define USE_NEOPIXEL
+#ifdef USE_NEOPIXEL
+#include "Neopixel.h" 
+#endif
 
 #define MAX_CPU_CORES 2
 #define IDLE_COUNT_PER_SECOND 515400 //Found by empirical sketch
@@ -744,6 +751,8 @@ RtkMode_t rtkMode; // Mode of operation
 bool sdCardForcedOffline = false; //Goes true if a isPresent() test passes, but then sdFat fails to mount SD card.
 //See issue: https://github.com/sparkfun/SparkFun_RTK_Firmware/issues/758
 
+
+
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 #define DEAD_MAN_WALKING_ENABLED    0
@@ -813,6 +822,9 @@ volatile bool deadManWalking;
 #define START_DEAD_MAN_WALKING
 
 #endif  // 0
+
+
+
 
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 /*
@@ -924,6 +936,11 @@ void setup()
 
     DMW_c("beginDisplay");
     beginDisplay(); // Start display to be able to display any errors
+    
+    #ifdef USE_NEOPIXEL
+    DMW_c("beginNeopixel");
+    beginNeopixel(); 
+    #endif
 
     DMW_c("findSpiffsPartition");
     if (!findSpiffsPartition())
@@ -1031,6 +1048,9 @@ void loop()
 
     DMW_c("updateDisplay");
     updateDisplay();
+    
+    DMW_c("updateNeopixel");
+    updateNeopixel();
 
     DMW_c("updateRTC");
     updateRTC(); // Set system time to GNSS once we have fix

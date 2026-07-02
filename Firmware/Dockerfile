@@ -69,6 +69,7 @@ RUN arduino-cli lib install "SparkFun u-blox GNSS v3"@3.0.14
 RUN arduino-cli lib install "SparkFun_WebServer_ESP32_W5500"@1.5.5
 RUN arduino-cli lib install "SparkFun Qwiic OLED Arduino Library"@1.0.13
 RUN arduino-cli lib install SSLClientESP32@2.0.0
+RUN arduino-cli lib install "Adafruit NeoPixel"@1.12.3
 
 # Enable external libs
 RUN arduino-cli config set library.enable_unsafe_install true

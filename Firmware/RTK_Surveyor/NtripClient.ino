@@ -302,6 +302,11 @@ bool ntripClientConnect()
     return true;
 }
 
+
+uint8_t ntripClientStateGet(){
+    return ntripClientState;
+}
+
 // Determine if another connection is possible or if the limit has been reached
 bool ntripClientConnectLimitReached()
 {

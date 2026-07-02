@@ -198,11 +198,13 @@ void menuMessages()
         systemPrintln("7) Set MON Messages");
         systemPrintln("8) Set TIM Messages");
         systemPrintln("9) Set PUBX Messages");
+        
+        systemPrintln("10) Arduino data logger Defaults (NAV_PVT + NAV_TIMEUTC)");
 
-        systemPrintln("10) Reset to Surveying Defaults (NMEAx5)");
-        systemPrintln("11) Reset to PPP Logging Defaults (NMEAx5 + RXMx2)");
-        systemPrintln("12) Turn off all messages");
-        systemPrintln("13) Turn on all messages");
+        systemPrintln("11) Reset to Surveying Defaults (NMEAx5)");
+        systemPrintln("12) Reset to PPP Logging Defaults (NMEAx5 + RXMx2)");
+        systemPrintln("13) Turn off all messages");
+        systemPrintln("14) Turn on all messages");
 
         systemPrintln("x) Exit");
 
@@ -231,6 +233,13 @@ void menuMessages()
         else if (incoming == 10)
         {
             setGNSSMessageRates(settings.ubxMessageRates, 0); // Turn off all messages
+            setMessageRateByName("UBX_NAV_PVT", 1);
+            setMessageRateByName("UBX_NAV_TIMEUTC", 1);
+            systemPrintln("Reset to Arduino data logger Defaults (NAV_PVT + NAV_TIMEUTC)");
+        }
+        else if (incoming == 11)
+        {
+            setGNSSMessageRates(settings.ubxMessageRates, 0); // Turn off all messages
             setMessageRateByName("UBX_NMEA_GGA", 1);
             setMessageRateByName("UBX_NMEA_GSA", 1);
             setMessageRateByName("UBX_NMEA_GST", 1);
@@ -244,7 +253,7 @@ void menuMessages()
             setMessageRateByName("UBX_NMEA_RMC", 1);
             systemPrintln("Reset to Surveying Defaults (NMEAx5)");
         }
-        else if (incoming == 11)
+        else if (incoming == 12)
         {
             setGNSSMessageRates(settings.ubxMessageRates, 0); // Turn off all messages
             setMessageRateByName("UBX_NMEA_GGA", 1);
@@ -263,12 +272,12 @@ void menuMessages()
             setMessageRateByName("UBX_RXM_SFRBX", 1);
             systemPrintln("Reset to PPP Logging Defaults (NMEAx5 + RXMx2)");
         }
-        else if (incoming == 12)
+        else if (incoming == 13)
         {
             setGNSSMessageRates(settings.ubxMessageRates, 0); // Turn off all messages
             systemPrintln("All messages disabled");
         }
-        else if (incoming == 13)
+        else if (incoming == 14)
         {
             setGNSSMessageRates(settings.ubxMessageRates, 1); // Turn on all messages to report once per fix
             systemPrintln("All messages enabled");
