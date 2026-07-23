@@ -1,0 +1,44 @@
+ESP32 Feather V2
+================
+with ESP32-pico-mini-02 module
+
+Providing: Wifi, User interface, NTRIP client
+
+Schematics: https://cdn-learn.adafruit.com/assets/assets/000/109/518/original/adafruit_products_FV2_sch.png?1646779441
+Pinout: https://cdn-learn.adafruit.com/assets/assets/000/123/406/original/adafruit_products_Adafruit_ESP32_Feather_V2_Pinout.png?1691707257
+Datasheet: https://documentation.espressif.com/esp32-pico-mini-02_datasheet_en.pdf
+
+Running: git@github.com:magnuan/SparkFun_RTK_Firmware.git
+
+Interfaces:
+ 
+ UART0 -> USB teminal  (console user interface)
+ UART1 ->
+ UART2  Rx=7, Tx=21     -> GNSS UART1   (corrections / data)
+ I2C   SDA=19, SCL=8    -> GNSS I2C     (config)
+
+
+
+
+
+Teensy 4.1
+===========
+ UART7 RX (28)           -> GNSS UART1 TX (data)
+ IRQ   (27)              -> GNSS PPS
+
+ SPI0  (10,11,12,13)    -> IMU (SPI)         
+ IRQ   (9)              -> IMU (I1)
+
+ I2C   (18,19)          -> Display (i2c)
+
+ Ethernet               -> LIDAR
+
+ SDcard
+
+
+
+
+Teensy reads GNSS data in UBX_NAV format, needs:
+UBX_NAV_POS_LLH (High rate):
+UBX_NAV_POS_PVT (1Hz)):
+UBX_NAV_TIME_UTC (1Hz):
